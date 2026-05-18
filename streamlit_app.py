@@ -1,40 +1,201 @@
 import streamlit as st
 import numpy as np
 import random
+import pandas as pd
 
-# -----------------------------
+# -------------------------------------------------
 # PAGE CONFIG
-# -----------------------------
+# -------------------------------------------------
 st.set_page_config(
-    page_title="ElderCare AI",
+    page_title="ElderCare AI Monitoring System",
     layout="wide"
 )
 
-# -----------------------------
-# CUSTOM LIGHT GUI STYLE
-# -----------------------------
+# -------------------------------------------------
+# CLEAN LIGHT UI STYLE
+# -------------------------------------------------
 st.markdown("""
 <style>
-.main {
-    background-color: #F8FBFD;
-}
-
-.metric-card {
-    background-color: white;
-    padding: 15px;
-    border-radius: 12px;
-    box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
-}
-
-.big-title {
-    font-size:32px;
+.big-title{
+    font-size:34px;
     font-weight:700;
     color:#0B3C49;
 }
-
-.subtitle {
+.subtitle{
     color:#6c757d;
+    margin-bottom:15px;
 }
+</style>
+""", unsafe_allow_html=True)
+
+# -------------------------------------------------
+# HEADER
+# -------------------------------------------------
+st.markdown('<div class="big-title">ElderCare AI Monitoring Dashboard</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">AI-powered elderly safety and caregiver intelligence system</div>', unsafe_allow_html=True)
+
+st.divider()
+
+# -------------------------------------------------
+# SYNTHETIC SENSOR DATA
+# -------------------------------------------------
+posture = random.choice(["Standing","Walking","Sitting","Lying"])
+heart_rate = np.random.randint(50,120)
+movement = round(np.random.uniform(0,1),2)
+time_posture = random.randint(1,120)
+temperature = round(np.random.normal(36.7,0.5),1)
+time_of_day = random.choice(["Morning","Afternoon","Night"])
+
+sensor = {
+    "posture": posture,
+    "heart_rate": heart_rate,
+    "movement": movement,
+    "time_posture": time_posture,
+    "temperature": temperature,
+    "time_of_day": time_of_day
+}
+
+# -------------------------------------------------
+# DASHBOARD METRICS
+# -------------------------------------------------
+c1,c2,c3,c4,c5,c6 = st.columns(6)
+
+c1.metric("Posture", posture)
+c2.metric("Heart Rate", f"{heart_rate} BPM")
+c3.metric("Movement Level", movement)
+c4.metric("Time in Posture", f"{time_posture} min")
+c5.metric("Body Temperature", f"{temperature} °C")
+c6.metric("Time of Day", time_of_day)
+
+st.divider()
+
+# -------------------------------------------------
+# EXPLAINABLE AI ENGINE
+# -------------------------------------------------
+risk = 0
+explanations = []
+
+# Individual Signals
+if heart_rate > 100:
+    explanations.append("Elevated heart rate detected.")
+    risk += 0.25
+
+if heart_rate < 55:
+    explanations.append("Unusually low heart rate observed.")
+    risk += 0.25
+
+if movement < 0.15:
+    explanations.append("Very low body movement detected.")
+    risk += 0.20
+
+if temperature > 37.8:
+    explanations.append("Body temperature indicates possible fever.")
+    risk += 0.15
+
+# Contextual AI Combinations
+
+if posture=="Lying" and time_posture>45 and heart_rate>95:
+    explanations.append(
+        "Prolonged lying combined with elevated heart rate suggests possible distress or fall."
+    )
+    risk += 0.40
+
+if posture=="Lying" and movement<0.15 and time_posture>40:
+    explanations.append(
+        "Extended immobility detected. User may be unconscious or unable to move."
+    )
+    risk += 0.35
+
+if posture=="Lying" and time_of_day=="Afternoon" and movement<0.1:
+    explanations.append(
+        "Unexpected prolonged rest during active hours detected."
+    )
+    risk += 0.25
+
+if posture=="Standing" and movement<0.1 and heart_rate<55:
+    explanations.append(
+        "Standing posture with low cardiac response may indicate dizziness risk."
+    )
+    risk += 0.30
+
+if heart_rate>105 and movement<0.2:
+    explanations.append(
+        "Cardiac stress without physical activity detected."
+    )
+    risk += 0.35
+
+if temperature>38 and movement<0.2:
+    explanations.append(
+        "High temperature with inactivity suggests illness or fatigue."
+    )
+    risk += 0.30
+
+risk = min(risk,1.0)
+
+# -------------------------------------------------
+# RISK STATUS
+# -------------------------------------------------
+if risk < 0.3:
+    status = "Stable Condition"
+elif risk < 0.6:
+    status = "Moderate Risk Detected"
+else:
+    status = "High Risk — Immediate Attention Recommended"
+
+# -------------------------------------------------
+# MAIN LAYOUT
+# -------------------------------------------------
+left,right = st.columns([2,1])
+
+with left:
+
+    st.subheader("AI Risk Assessment")
+
+    st.progress(risk)
+
+    if risk < 0.3:
+        st.success(status)
+    elif risk < 0.6:
+        st.warning(status)
+    else:
+        st.error(status)
+
+    st.subheader("Explainable AI Reasoning")
+
+    if explanations:
+        for exp in explanations:
+            st.write(exp)
+    else:
+        st.write("No abnormal behavioural pattern detected.")
+
+with right:
+
+    st.subheader("Caregiver Actions")
+
+    if st.button("Notify Caregiver"):
+        st.success("Caregiver notification sent.")
+
+    if st.button("Request Emergency Assistance"):
+        st.error("Emergency response triggered.")
+
+    if st.button("Mark Patient Safe"):
+        st.info("Status updated to safe.")
+
+st.divider()
+
+# -------------------------------------------------
+# HEALTH TREND GRAPH
+# -------------------------------------------------
+st.subheader("Health Trend Overview")
+
+data = pd.DataFrame(
+    np.random.randn(30,3),
+    columns=["Heart Rate Trend","Activity Level","AI Risk Trend"]
+)
+
+st.line_chart(data)
+
+st.caption("Prototype demonstration using simulated AI monitoring data.")}
 </style>
 """, unsafe_allow_html=True)
 
